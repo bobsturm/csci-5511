@@ -1,0 +1,7 @@
+(defun functionatom (l)
+  (if (not (null l))
+      (if (listp (car l)) (functionatom (append (functionatom (car l)) (functionatom (cdr l))))
+          (cons (car l) (functionatom (cdr l)))
+      )
+  )
+)
