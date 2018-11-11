@@ -11,8 +11,7 @@
  
 
 ;; root: the root of the search tree to search
-(defun a-star-search (root fn-generate-children)
+(defun a-star-search (root fn-generate-child-states)
    (print-node root)
-   (let ((frontier (funcall fn-generate-children root)))
-   )
+   (funcall fn-generate-child-states (search-node-state root))
 )

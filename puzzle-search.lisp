@@ -4,7 +4,8 @@
 )
 
 (defun create-state (0_0 0_1 0_2 1_0 1_1 1_2 2_0 2_1 2_2)
-   (make-array '(3 3) :initial-contents (list (list 0_0 0_1 0_2) (list 1_0 1_1 1_2) (list 2_0 2_1 2_2)))
+;   (make-array '(3 3) :initial-contents (list (list 0_0 0_1 0_2) (list 1_0 1_1 1_2) (list 2_0 2_1 2_2)))
+  (list (list 0_0 0_1 0_2) (list 1_0 1_1 1_2) (list 2_0 2_1 2_2))
 )
 
 (defparameter *blank-square* -99 "constant representing the blank square")
@@ -12,6 +13,8 @@
 
 ;; TODO: remove hardcoded refs to the board being 3x3
 ;; TODO: make board size refs constants or variables
+
+;; todo: change state to be a list?
 
 (defun create-node (pname name state)
    (make-search-node 
@@ -29,11 +32,39 @@
    )
 )
 
+(defun get-loc-value(state i j)
+ (nth j (nth i state))
+)
+
+(defun get-new-value (state loc swaploc1 swaploc2)
+   (let ((swap1i (location-i swaploc1))
+         (swap1j (location-j swaploc1))
+         (swap2i (location-i swaploc2))
+         (swap2j (location-j swaploc2))
+         (curi (location-i loc))
+         (curj (location-j loc)))
+            (if (and (equal curi swap1i) (equal curj swap1j))
+               (get-loc-value state swap2i swap2j)
+                  (if (and (equal curi swap2i) (equal curj swap2j))
+                     (get-loc-value state swap1i swap1j)
+                        (get-loc-value state curi curj)
+               )
+         )
+    )
+)
+
 ;; returns a 2 element array representing i (row index) and j (column index) of the given tile.
 ;; caller should seed i and j to 0 and 0.
 (defun find-loc-inner (state tile i j)
    (if (> j 2) (error "TILE NOT FOUND!!")) 
-   (if (equal (aref state i j) tile)
+;   (if (equal (aref state i j) tile)
+;      (make-location :i i :j j)
+;      (if (< i 2)
+;         (find-loc-inner state tile (+ i 1) j)
+;         (find-loc-inner state tile 0 (+ j 1))
+;      )
+;   )
+   (if (equal (get-loc-value state i j) tile)
       (make-location :i i :j j)
       (if (< i 2)
          (find-loc-inner state tile (+ i 1) j)
@@ -84,36 +115,57 @@
    )
 )
 
-;; newloc is the (i, j) list representing the new location
+; returns state if it is valid
+; raises error if state is invalid
+; TODO: use row-major-aref and array map to validate that numbers are unique?
+(defun validate-state (state)
+  state
+)
+
+
+;; newloc is a location structure
 ;; returns nil if the move is not legal
 (defun move (state newloc)
-;  (if (is-legal (first newloc) (second newloc)))
-;     (let ((loc (find-loc(state *blank-square*))))
-;     )
-;  )      
+  (let ((loc (find-loc state *blank-square*)))
+;     (format t "loc:~S~%" loc)
+     (if (is-legal-move loc newloc)
+;        (let ((curval (aref state (location-i newloc) (location-j newloc)))
+;              (newstate (create-state (aref state 0 0) (aref state 0 1) (aref state 0 2) (aref state 1 0) (aref state 1 1) (aref state 1 2) (aref state 2 0) (aref state 2 1) (aref state 2 2))))
+;           (setf (aref newstate (location-i newloc) (location-j newloc)) *blank-square*)
+;           (setf (aref newstate (location-i loc) (location-j loc)) curval)
+;           (validate-state newstate)
+;        )
+         (progn
+           (format t "~%past is-legal-move. loc:~S newloc:~S~%" loc newloc)
+         (create-state (get-new-value state (make-location :i 0 :j 0) newloc loc)
+                       (get-new-value state (make-location :i 0 :j 1) newloc loc)
+                       (get-new-value state (make-location :i 0 :j 2) newloc loc)
+                       (get-new-value state (make-location :i 1 :j 0) newloc loc)
+                       (get-new-value state (make-location :i 1 :j 1) newloc loc)
+                       (get-new-value state (make-location :i 1 :j 2) newloc loc)
+                       (get-new-value state (make-location :i 2 :j 0) newloc loc)
+                       (get-new-value state (make-location :i 2 :j 1) newloc loc)
+                       (get-new-value state (make-location :i 2 :j 2) newloc loc))
+     ))
+   )  
 )
 
-;; Returns nil if the move is not legal.
-(defun move-up (state)
-;  (let ((loc (find-loc state *blank-square*)))
-;      let ((newloc (list (first loc)
-)
-
-(defun generate-children (n)
-;   (let (
-;      (state (search-node-state n))
-;      (children '())
-;      (k 1))
-;      (if (is-legal (+ 1 (find-loc state *blank-square*)))
-;         (adjoin (create-child-node
-;   )
+(defun generate-child-states (parentstate)
+       (let ((blankloc (find-loc parentstate *blank-square*)))
+         (remove nil (list (move parentstate (make-location :i (- (location-i blankloc) 1) :j (location-j blankloc))) ;; move up
+                           (move parentstate (make-location :i (+ (location-i blankloc) 1) :j (location-j blankloc))) ;; move down
+                           (move parentstate (make-location :i (location-i blankloc) :j (+ (location-j blankloc) 1))) ;; move right
+                           (move parentstate (make-location :i (location-i blankloc) :j (- (location-j blankloc) 1))) ;; move left
+                      )
+         )
+       )
 )
 
 
 (defun puzzle-search ()
 ;; create the start state and put it in the frontier
    (let ((root (create-root)))
-      (a-star-search root #'generate-children)
+      (a-star-search root #'generate-child-states)
    )
 )
 
