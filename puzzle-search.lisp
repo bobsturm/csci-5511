@@ -1,41 +1,29 @@
+;; a location on the board, specified by row (i) and column (j)
 (defstruct location
   i  ;; number representing row index
   j  ;; number representing column index
 )
 
 (defun create-state (0_0 0_1 0_2 1_0 1_1 1_2 2_0 2_1 2_2)
-;   (make-array '(3 3) :initial-contents (list (list 0_0 0_1 0_2) (list 1_0 1_1 1_2) (list 2_0 2_1 2_2)))
   (list (list 0_0 0_1 0_2) (list 1_0 1_1 1_2) (list 2_0 2_1 2_2))
 )
 
 (defparameter *blank-square* -99 "constant representing the blank square")
 (defparameter *goal-state* (create-state 1 2 3 4 5 6 7 8 *blank-square*))
+(defparameter *default-start-state* (create-state *blank-square* 1 3 4 2 5 7 8 6))
 
 ;; TODO: remove hardcoded refs to the board being 3x3
 ;; TODO: make board size refs constants or variables
 
 ;; todo: change state to be a list?
 
-(defun create-node (pname name state)
-   (make-search-node 
-       :name (if (null pname) (write-to-string name) 
-               (concatenate 'string pname "." (write-to-string name))
-             )
-       :state state
-   )
-)
 
-(defun create-root()
-   (let ((root (create-node nil "0" (create-state *blank-square* 1 3 4 2 5 7 8 6))))
-      (setf (search-node-g_n root) 0)
-      root
-   )
-)
-
+;; gets the value of the tile (or blank) on the given coordinates
 (defun get-loc-value(state i j)
  (nth j (nth i state))
 )
 
+;; given a state of the board and 2 locations to swap, this will return the appropriate value for the loc given.
 (defun get-new-value (state loc swaploc1 swaploc2)
    (let ((swap1i (location-i swaploc1))
          (swap1j (location-j swaploc1))
@@ -53,34 +41,27 @@
     )
 )
 
-;; returns a 2 element array representing i (row index) and j (column index) of the given tile.
+;; returns a location structure representing the location of the given tile value.
 ;; caller should seed i and j to 0 and 0.
 (defun find-loc-inner (state tile i j)
    (if (> j 2) (error "TILE NOT FOUND!!")) 
-;   (if (equal (aref state i j) tile)
-;      (make-location :i i :j j)
-;      (if (< i 2)
-;         (find-loc-inner state tile (+ i 1) j)
-;         (find-loc-inner state tile 0 (+ j 1))
-;      )
-;   )
+
    (if (equal (get-loc-value state i j) tile)
       (make-location :i i :j j)
       (if (< i 2)
          (find-loc-inner state tile (+ i 1) j)
-         (find-loc-inner state tile 0 (+ j 1))
+           (find-loc-inner state tile 0 (+ j 1))
       )
    )
 )
+
+;; finds the given tile in the state rpresentation
 (defun find-loc (state tile)
    (find-loc-inner state tile 0 0)
 )
 
 (defun is-legal (i j)
-  (and 
-     (and (< i 3) (> i -1)) 
-     (and (< j 3) (> j -1))
-   )
+  (and (< i 3) (> i -1) (< j 3) (> j -1))
 )
 
 ; returns t if the proposed move is legal, nil otherwise
@@ -96,7 +77,6 @@
        )
        (let ((disti (abs (- newi i)))
              (distj (abs (- newj j))))
-;             (format t "i:~S, j:~S, newi:~S, newj:~S, disti:~S, distj:~S" i j newi newj disti distj)
              (if (not (is-legal i j)) 
                 (error "Invalid loc provided ~S~%" loc)
              )
@@ -127,16 +107,7 @@
 ;; returns nil if the move is not legal
 (defun move (state newloc)
   (let ((loc (find-loc state *blank-square*)))
-;     (format t "loc:~S~%" loc)
      (if (is-legal-move loc newloc)
-;        (let ((curval (aref state (location-i newloc) (location-j newloc)))
-;              (newstate (create-state (aref state 0 0) (aref state 0 1) (aref state 0 2) (aref state 1 0) (aref state 1 1) (aref state 1 2) (aref state 2 0) (aref state 2 1) (aref state 2 2))))
-;           (setf (aref newstate (location-i newloc) (location-j newloc)) *blank-square*)
-;           (setf (aref newstate (location-i loc) (location-j loc)) curval)
-;           (validate-state newstate)
-;        )
-         (progn
-           (format t "~%past is-legal-move. loc:~S newloc:~S~%" loc newloc)
          (create-state (get-new-value state (make-location :i 0 :j 0) newloc loc)
                        (get-new-value state (make-location :i 0 :j 1) newloc loc)
                        (get-new-value state (make-location :i 0 :j 2) newloc loc)
@@ -146,7 +117,7 @@
                        (get-new-value state (make-location :i 2 :j 0) newloc loc)
                        (get-new-value state (make-location :i 2 :j 1) newloc loc)
                        (get-new-value state (make-location :i 2 :j 2) newloc loc))
-     ))
+     )
    )  
 )
 
@@ -161,12 +132,59 @@
        )
 )
 
-
-(defun puzzle-search ()
-;; create the start state and put it in the frontier
-   (let ((root (create-root)))
-      (a-star-search root #'generate-child-states)
+(defun man-distance-filter-blank (i j from-state to-state)
+   (if (equal (get-loc-value from-state i j) *blank-square*) 0
+      (man-distance i j from-state to-state)
    )
 )
 
+;; i and j are coordinates to the tile in from-state to measure distance to to-state
+(defun man-distance (i j from-state to-state)
+   (let ((tile (get-loc-value from-state i j)))
+      (let ((to-loc (find-loc to-state tile)))
+         (+ (abs (- (location-i to-loc) i)) (abs (- (location-j to-loc) j)))
+      )
+   )
+)
 
+;; TODO: remove blank tile
+(defun heuristic-inner (i j cur start goal ignore)
+   (if (> j 2)  0
+      (+ ; (man-distance-filter-blank i j cur start)
+         (man-distance-filter-blank i j cur goal)
+         (if (equal i 2) (heuristic-inner 0 (+ j 1) cur start goal ignore)
+             (heuristic-inner (+ 1 i) j cur start goal ignore)
+         )
+      )
+   )
+)
+
+;; manhattan distance
+;; curstate is not use in this implementation (8 puzzle), but may be use in others
+;; IMPORTANT: The global variables *heuristic-goal-state* and *heuristic-start-state* must be set before calling this function.  The heuristic is dependent on these!
+(defun heuristic (curstate futurestate)
+   (if (or (null *heuristic-start-state*) (null *heuristic-goal-state*))
+      (error "The global variable *heuristic-goal-state* and *heuristic-start-state* must be setup before heuristics can be calculated!")
+   )
+   (heuristic-inner 0 0 futurestate *heuristic-start-state* *heuristic-goal-state* *blank-square*)
+)
+
+(defun state-equal (state1 state2)
+   (if (not (and (listp state1) (listp state2)))
+      (error "Unexpected type received within function ~S" #'state-equal)
+         (equalp state1 state2)
+   )
+)
+
+;; solves the 8-puzzle problem with the given start state of the board.
+;; if no start state is provided the *default-start-state is used.
+(defun puzzle-search (&optional start)
+   (if (null start)
+       (setq start *default-start-state*)
+   )
+;; todo: GET RID OF THIS -- TEMPORARY
+;   (setq start (create-state 1 2 3 4 5 *blank-square* 7 8 6))
+   (setq *heuristic-start-state* start)
+   (setq *heuristic-goal-state* *goal-state*)
+   (a-star-search start *goal-state* #'generate-child-states #'heuristic #'state-equal)
+)

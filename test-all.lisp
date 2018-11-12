@@ -25,7 +25,7 @@
 ;;helper function.  calls the function being tested with 2 args.  Raises error if the actual value is not equal to the expected value.
 (defun error-if-failed2(arg1 arg2 expected fn)
   (progn
-     (format t "calling ~S with arg1:~S, arg2:~S,  expecting:~S..." fn arg1 arg2 expected)
+     (format t "calling ~S with arg1:~S, arg2:~S, expecting:~S..." fn arg1 arg2 expected)
      (let ((actual (funcall fn arg1 arg2)))
         (assert-actual actual expected)
      )
@@ -37,6 +37,26 @@
   (progn
      (format t "calling ~S with arg: ~S, expecting ~S...." fn arg1 expected)
      (let ((actual (funcall fn arg1)))
+        (assert-actual actual expected)
+     )
+  )
+)
+
+;;helper function.  calls the function being tested with 3 args.  Raises error if the actual value is not equal to the expected value.
+(defun error-if-failed3 (arg1 arg2 arg3 expected fn)
+  (progn
+     (format t "calling ~S with arg1:~S, arg2:~S, arg3:~S, expecting:~S..." fn arg1 arg2 arg3 expected)
+     (let ((actual (funcall fn arg1 arg2 arg3)))
+        (assert-actual actual expected)
+     )
+  )
+)
+
+;;helper function.  calls the function being tested with 4 args.  Raises error if the actual value is not equal to the expected value.
+(defun error-if-failed4 (arg1 arg2 arg3 arg4 expected fn)
+  (progn
+     (format t "calling ~S with arg1:~S, arg2:~S, arg3:~S, arg4~S, expecting:~S..." fn arg1 arg2 arg3 arg4 expected)
+     (let ((actual (funcall fn arg1 arg2 arg3 arg4)))
         (assert-actual actual expected)
      )
   )
@@ -158,8 +178,65 @@
                                                                              (create-state 1 2 3 *blank-square* 4 5 6 7 8)) #'generate-child-states)
        (error-if-failed1 (create-state *blank-square* 8 7 6 5 4 3 2 1) (list (create-state 6 8 7 *blank-square* 5 4 3 2 1) 
                                                                              (create-state 8 *blank-square* 7 6 5 4 3 2 1)) #'generate-child-states)
+       (error-if-failed1 (create-state 8 *blank-square* 7 6 5 4 3 2 1) (list (create-state 8 5 7 6 *blank-square* 4 3 2 1) 
+                                                                             (create-state 8 7 *blank-square* 6 5 4 3 2 1)
+                                                                             (create-state *blank-square* 8 7 6 5 4 3 2 1)) #'generate-child-states)
+       (error-if-failed1 (create-state 8 7 *blank-square* 6 5 4 3 2 1) (list (create-state 8 7 4 6 5 *blank-square* 3 2 1) 
+                                                                             (create-state 8 *blank-square* 7 6 5 4 3 2 1)) #'generate-child-states)
+       (error-if-failed1 (create-state 8 7 6 5 4 3 2 1 *blank-square*) (list (create-state 8 7 6 5 4 *blank-square* 2 1 3) 
+                                                                             (create-state 8 7 6 5 4 3 2 *blank-square* 1)) #'generate-child-states)
+       (error-if-failed1 (create-state 8 7 6 *blank-square* 5 4 3 2 1) (list (create-state *blank-square* 7 6 8 5 4 3 2 1)
+                                                                             (create-state 8 7 6 3 5 4 *blank-square* 2 1) 
+                                                                             (create-state 8 7 6 5 *blank-square* 4 3 2 1)) #'generate-child-states)
        (format t "All ~S tests completed.~%" #'generate-child-states)
     )
+)
+
+(defun test-man-distance()
+  (progn (format t "Initiating tests for ~S...~%" #'man-distance) 
+       (error-if-failed4 0 0 (create-state 1 2 3 4 5 6 7 8 9) (create-state 1 2 3 4 5 6 7 8 9) 0 #'man-distance)
+       (error-if-failed4 2 2 (create-state 1 2 3 4 5 6 7 8 9) (create-state 9 2 3 4 5 6 7 8 1) 4 #'man-distance)
+       (error-if-failed4 1 2 (create-state 1 2 3 4 5 6 7 8 9) (create-state 1 2 3 6 5 4 7 8 9) 2 #'man-distance)
+       (error-if-failed4 2 1 (create-state 1 2 3 4 5 6 7 8 9) (create-state 1 2 3 4 5 6 8 7 9) 1 #'man-distance)
+       (format t "All ~S tests completed.~%" #'man-distance)
+    )
+)
+
+(defun test-heuristic()
+   (setq *heuristic-start-state* *default-start-state*)
+   (setq *heuristic-goal-state* *goal-state*)
+
+   (progn (format t "Initiating tests for ~S...~%" #'heuristic) 
+       (error-if-failed2 nil *goal-state* 0 #'heuristic) ; 4
+       (error-if-failed2 nil (create-state 1 2 *blank-square* 4 5 3 7 8 6) 2 #'heuristic) ;6
+       (error-if-failed2 nil (create-state 1 2 3 4 *blank-square* 5 7 8 6) 2 #'heuristic) ;4
+       (error-if-failed2 nil (create-state *blank-square* 2 4 6 8 1 3 5 7) 16 #'heuristic);34
+       (format t "All ~S tests completed.~%" #'heuristic)
+   )
+)
+
+(defun test-create-child-nodes()
+   (progn 
+       (format t "Initiating tests for ~S...~%" #'create-child-nodes)
+       (let ((test-root (create-node nil "ROOT" *default-start-state* nil)))
+          (error-if-failed3 test-root #'generate-child-states #'heuristic 
+               (list
+                   (create-node test-root "1" (create-state 4 1 3 *blank-square* 2 5 7 8 6) (heuristic nil (create-state 4 1 3 *blank-square* 2 5 7 8 6)))
+                   (create-node test-root "2" (create-state 1 *blank-square* 3 4 2 5 7 8 6) (heuristic nil (create-state 1 *blank-square* 3 4 2 5 7 8 6)))
+               )
+              #'create-child-nodes)
+       )
+       (let ((test-root (create-node nil "ROOT" (create-state 1 2 3 4 5 *blank-square* 7 8 6) nil)))
+          (error-if-failed3 test-root #'generate-child-states #'heuristic 
+               (list
+                   (create-node test-root "1" (create-state 1 2 *blank-square* 4 5 3 7 8 6) (heuristic nil (create-state 1 2 *blank-square* 4 5 3 7 8 6)))
+                   (create-node test-root "2" (create-state 1 2 3 4 5 6 7 8 *blank-square*) (heuristic nil (create-state 1 2 3 4 5 6 7 8 *blank-square*)))
+                   (create-node test-root "3" (create-state 1 2 3 4 *blank-square* 5 7 8 6) (heuristic nil (create-state 1 2 3 4 *blank-square* 5 7 8 6)))
+               )
+              #'create-child-nodes)
+       )
+       (format t "All ~S tests completed.~%" #'create-child-nodes)
+   )
 )
 
 ;; this is the main test driver for all 3 parts to the assignment
@@ -171,6 +248,9 @@
          (test-is-legal-move)
          (test-move)
          (test-generate-child-states)
+         (test-man-distance)
+         (test-heuristic)
+         (test-create-child-nodes)
          (puzzle-search)
          "ALL TESTS PASSED!"
   )

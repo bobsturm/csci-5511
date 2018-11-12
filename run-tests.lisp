@@ -5,7 +5,7 @@
          (load "test-all.lisp")
          (load "functionatom.lisp")
          (load "replaceword.lisp")
-         (load "print-node.lisp")
+         (load "print-tree.lisp")
          (load "puzzle-search.lisp")
          (load "a-star-search.lisp")
          (format t "Loading completed.  Invoking all tests...")
