@@ -186,5 +186,6 @@
 ;   (setq start (create-state 1 2 3 4 5 *blank-square* 7 8 6))
    (setq *heuristic-start-state* start)
    (setq *heuristic-goal-state* *goal-state*)
+   (format t "Calling a-star-search with start:~S, goal:~S...~%" start *goal-state*)
    (a-star-search start *goal-state* #'generate-child-states #'heuristic #'state-equal)
 )

@@ -53,17 +53,18 @@
 ;; input:  the frontier
 ;; assumes thqt the frontier is sorted by f(n) = h(n) + g(n).
 (defun expand-next (frontier goal-state fn-generate-child-states fn-heuristic fn-state-equal stop)
-   (print-tree frontier t)
-   (if (not (equal stop 3000))
+;   (format t "PRINTING TREE:~%")
+;   (print-tree frontier t)
+   (if (not (equal stop 30))
 (progn
    (if (or (null frontier) (not (listp frontier)))
       (error "Frontier is either nil or not a list!  frontier:~S~%" frontier)
    )
-   (format t "frontier size is:~S, stop:~S" (list-length frontier) stop)
+;   (format t "frontier size is:~S, stop:~S" (list-length frontier) stop)
    (let ((next (pop frontier)))
       (if (not (funcall fn-state-equal goal-state (search-node-state next)))
           (let ((children (create-child-nodes next fn-generate-child-states fn-heuristic)))
-             (format t "goal-state:~S next~S~%" goal-state next)
+;             (format t "goal-state:~S next~S~%" goal-state next)
              (setf (search-node-children next) children) ;; set the children on their parent
              (expand-next 
                       (sort (append children frontier) #'search-node-sorter) 
@@ -85,6 +86,7 @@
       (set-g_n root 0)
       ;; start the search...
       (expand-next (list root) goal-state fn-generate-child-states fn-heuristic fn-state-equal 0)
+      (format t "CALLING PRINT-TREE*********~%")
       (print-tree root t)
       (format t "A* SEARCH COMPLETED~%")
    )
