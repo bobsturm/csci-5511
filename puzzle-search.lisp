@@ -8,7 +8,7 @@
   (list (list 0_0 0_1 0_2) (list 1_0 1_1 1_2) (list 2_0 2_1 2_2))
 )
 
-(defparameter *blank-square* -99 "constant representing the blank square")
+(defparameter *blank-square* 0 "constant representing the blank square")
 (defparameter *goal-state* (create-state 1 2 3 4 5 6 7 8 *blank-square*))
 (defparameter *default-start-state* (create-state *blank-square* 1 3 4 2 5 7 8 6))
 

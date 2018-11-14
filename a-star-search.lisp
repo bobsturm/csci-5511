@@ -87,7 +87,7 @@
       ;; start the search...
       (expand-next (list root) goal-state fn-generate-child-states fn-heuristic fn-state-equal 0)
       (format t "CALLING PRINT-TREE*********~%")
-      (print-tree root t)
+      (print-tree root nil)
       (format t "A* SEARCH COMPLETED~%")
    )
 )
