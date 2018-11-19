@@ -1,3 +1,9 @@
+;; create-child-nodes is exported only for testing purposes.
+(defpackage a-star
+   (:export :a-star-search :create-child-nodes :create-node)
+)
+
+(in-package a-star)
 
 ;; structure for nodes within the search tree
 (defstruct search-node 
@@ -7,6 +13,39 @@
    children  ;; list of nodes created for potential expansion.  nil if this node has not yet been expanded.
    h_n       ;; A number representing the heuristic function's value for this node
    g_n       ;; A number representing the actual cost of the path to this node.  this is nil until this node has been expanded.
+)
+
+
+; prints a single node
+(defun print-node (n detail fn-get-printable-state)
+   (let ((child-count (list-length (search-node-children n)))
+         (hn  (search-node-h_n n)))
+            (if (or (> child-count 0) (equal hn 0) detail)
+               (progn
+                  (format t "---~%~S~%" (search-node-name n))
+                  (format t "~S~%" (funcall fn-get-printable-state  (search-node-state n)))
+                  (format t "h(n):~S~%NUM-CHILDREN:~S~%" hn child-count)
+               )
+            )
+    )
+)
+
+;; breadth first print.
+(defun print-tree (n detail fn-get-printable-state)
+   (if (not (null n))
+       (if (listp n)
+          (progn 
+             (print-node (car n) detail fn-get-printable-state)
+             (print-tree (cdr n) detail fn-get-printable-state)
+             (print-tree (search-node-children (car n)) detail fn-get-printable-state)
+          )
+            (progn
+               (print-node n detail fn-get-printable-state)
+               (print-tree (search-node-children n) detail fn-get-printable-state)
+            )
+        )
+   )
+
 )
 
 (defun set-g_n (node g_n)
@@ -37,7 +76,7 @@
    )
 )
 
-;; TODO: this needs tests!!
+;; 
 (defun create-child-nodes (parent fn-generate-child-states fn-heuristic)
    (let ((l (create-child-nodes-inner parent (funcall fn-generate-child-states (search-node-state parent)) fn-heuristic 1)))
            (format t "CREATED ~S children~%" (list-length l))
@@ -60,7 +99,7 @@
    (if (or (null frontier) (not (listp frontier)))
       (error "Frontier is either nil or not a list!  frontier:~S~%" frontier)
    )
-;   (format t "frontier size is:~S, stop:~S" (list-length frontier) stop)
+   (format t "frontier size is:~S, stop:~S" (list-length frontier) stop)
    (let ((next (pop frontier)))
       (if (not (funcall fn-state-equal goal-state (search-node-state next)))
           (let ((children (create-child-nodes next fn-generate-child-states fn-heuristic)))
@@ -80,14 +119,14 @@
 )
 
 ;; root: the root of the search tree to search
-(defun a-star-search (start-state goal-state fn-generate-child-states fn-heuristic fn-state-equal)
+(defun a-star:a-star-search (start-state goal-state fn-generate-child-states fn-heuristic fn-state-equal fn-get-printable-state)
    (format t "STARTING A* SEARCH~%")
    (let ((root (create-node nil "ROOT" start-state nil)))
       (set-g_n root 0)
       ;; start the search...
       (expand-next (list root) goal-state fn-generate-child-states fn-heuristic fn-state-equal 0)
       (format t "CALLING PRINT-TREE*********~%")
-      (print-tree root nil)
+      (print-tree root nil fn-get-printable-state)
       (format t "A* SEARCH COMPLETED~%")
    )
 )

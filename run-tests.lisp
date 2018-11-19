@@ -2,12 +2,12 @@
   (progn 
          (format t "Loading tests and functions...")
          (cd "~/Documents/personal/university-of-minnesota/csci-5511-artificial-intelligence/csci-5511")
+         (load "a-star-search.lisp")
          (load "test-all.lisp")
          (load "functionatom.lisp")
          (load "replaceword.lisp")
          (load "print-tree.lisp")
          (load "puzzle-search.lisp")
-         (load "a-star-search.lisp")
          (format t "Loading completed.  Invoking all tests...")
          (test-all)
   )

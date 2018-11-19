@@ -216,26 +216,32 @@
 )
 
 (defun test-create-child-nodes()
-   (progn 
-       (format t "Initiating tests for ~S...~%" #'create-child-nodes)
-       (let ((test-root (create-node nil "ROOT" *default-start-state* nil)))
+   (let ((curpackage *package*))
+      (format t "calling in-package astar")
+      (in-package a-star)
+      (progn 
+        (format t "Initiating tests for ~S...~%" #'a-star:create-child-nodes)
+        (let ((test-root (a-star:create-node nil "ROOT" *default-start-state* nil)))
           (error-if-failed3 test-root #'generate-child-states #'heuristic 
-               (list
-                   (create-node test-root "1" (create-state 4 1 3 *blank-square* 2 5 7 8 6) (heuristic nil (create-state 4 1 3 *blank-square* 2 5 7 8 6)))
-                   (create-node test-root "2" (create-state 1 *blank-square* 3 4 2 5 7 8 6) (heuristic nil (create-state 1 *blank-square* 3 4 2 5 7 8 6)))
-               )
-              #'create-child-nodes)
-       )
-       (let ((test-root (create-node nil "ROOT" (create-state 1 2 3 4 5 *blank-square* 7 8 6) nil)))
+                            (list
+                             (a-star:create-node test-root "1" (create-state 4 1 3 *blank-square* 2 5 7 8 6) (heuristic nil (create-state 4 1 3 *blank-square* 2 5 7 8 6)))
+                             (a-star:create-node test-root "2" (create-state 1 *blank-square* 3 4 2 5 7 8 6) (heuristic nil (create-state 1 *blank-square* 3 4 2 5 7 8 6)))
+                             )
+                            #'a-star:create-child-nodes)
+          )
+        (let ((test-root (a-star:create-node nil "ROOT" (create-state 1 2 3 4 5 *blank-square* 7 8 6) nil)))
           (error-if-failed3 test-root #'generate-child-states #'heuristic 
-               (list
-                   (create-node test-root "1" (create-state 1 2 *blank-square* 4 5 3 7 8 6) (heuristic nil (create-state 1 2 *blank-square* 4 5 3 7 8 6)))
-                   (create-node test-root "2" (create-state 1 2 3 4 5 6 7 8 *blank-square*) (heuristic nil (create-state 1 2 3 4 5 6 7 8 *blank-square*)))
-                   (create-node test-root "3" (create-state 1 2 3 4 *blank-square* 5 7 8 6) (heuristic nil (create-state 1 2 3 4 *blank-square* 5 7 8 6)))
-               )
-              #'create-child-nodes)
-       )
-       (format t "All ~S tests completed.~%" #'create-child-nodes)
+                            (list
+                             (a-star:create-node test-root "1" (create-state 1 2 *blank-square* 4 5 3 7 8 6) (heuristic nil (create-state 1 2 *blank-square* 4 5 3 7 8 6)))
+                             (a-star:create-node test-root "2" (create-state 1 2 3 4 5 6 7 8 *blank-square*) (heuristic nil (create-state 1 2 3 4 5 6 7 8 *blank-square*)))
+                             (a-star:create-node test-root "3" (create-state 1 2 3 4 *blank-square* 5 7 8 6) (heuristic nil (create-state 1 2 3 4 *blank-square* 5 7 8 6)))
+                             )
+                            #'a-star:create-child-nodes)
+          )
+        (format t "All ~S tests completed.~%" #'a-star:create-child-nodes)
+        )
+     (format t "calling in-package cl-user")
+     (in-package cl-user)
    )
 )
 

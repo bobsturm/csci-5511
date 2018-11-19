@@ -187,5 +187,5 @@
    (setq *heuristic-start-state* start)
    (setq *heuristic-goal-state* *goal-state*)
    (format t "Calling a-star-search with start:~S, goal:~S...~%" start *goal-state*)
-   (a-star-search start *goal-state* #'generate-child-states #'heuristic #'state-equal)
+   (a-star:a-star-search start *goal-state* #'generate-child-states #'heuristic #'state-equal #'get-printable-state)
 )
