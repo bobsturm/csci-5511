@@ -59,12 +59,13 @@
 (defun create-node (parent name state h_n)
    (make-search-node 
        :name (if (null parent) name 
-               (concatenate 'string (search-node-name parent) (write-to-string '-\>) name)
+               (concatenate 'string (search-node-name parent) (write-to-string '-) name) ;(write-to-string '-\>)
              )
        :state state
        :h_n h_n
        :parent parent
    )
+
 )
 
 (defun create-child-nodes-inner (parent child-states fn-heuristic childnum)
@@ -99,7 +100,7 @@
    (if (or (null frontier) (not (listp frontier)))
       (error "Frontier is either nil or not a list!  frontier:~S~%" frontier)
    )
-   (format t "frontier size is:~S, stop:~S" (list-length frontier) stop)
+;   (format t "frontier size is:~S, stop:~S" (list-length frontier) stop)
    (let ((next (pop frontier)))
       (if (not (funcall fn-state-equal goal-state (search-node-state next)))
           (let ((children (create-child-nodes next fn-generate-child-states fn-heuristic)))
@@ -123,9 +124,11 @@
    (format t "STARTING A* SEARCH~%")
    (let ((root (create-node nil "ROOT" start-state nil)))
       (set-g_n root 0)
+      (format t "~%CALLING PRINT-TREE1*********~%")
+      (print-tree root t fn-get-printable-state)
       ;; start the search...
       (expand-next (list root) goal-state fn-generate-child-states fn-heuristic fn-state-equal 0)
-      (format t "CALLING PRINT-TREE*********~%")
+      (format t "~%CALLING PRINT-TREE*********~%")
       (print-tree root nil fn-get-printable-state)
       (format t "A* SEARCH COMPLETED~%")
    )
