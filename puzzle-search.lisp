@@ -184,6 +184,14 @@
    (heuristic-inner 0 0 futurestate *heuristic-start-state* *heuristic-goal-state* *blank-square*)
 )
 
+;;; Cost function for puzzle.
+(defun g-cost (curcost prevstate newstate)
+   (if (null prevstate)
+       0 ; the root node is the only node with prevstate of nil
+       (+ curcost 1)
+   )
+)
+
 (defun state-equal (state1 state2)
    (if (not (and (listp state1) (listp state2)))
       (error "Unexpected type received within function ~S" #'state-equal)
@@ -193,16 +201,15 @@
 
 ;; solves the 8-puzzle problem with the given start state of the board.
 ;; if no start state is provided the *default-start-state is used.
-(defun puzzle-search (&optional start)
+(defun puzzle-search (&key (start *default-start-state*) (full-print nil))
    (if (null start)
        (setq start *default-start-state*)
    )
    (setq *heuristic-start-state* start)
    (setq *heuristic-goal-state* *goal-state*)
-;   (format t "Calling a-star-search with start:~S, goal:~S...~%" start *goal-state*)
-   (let ((sol-root (a-star:a-star-search start *goal-state* #'generate-child-states #'heuristic #'state-equal #'get-printable-state)))
-      (a-star::print-tree sol-root nil #'get-printable-state)
-      sol-root
+   (let ((sol-root (a-star:a-star-search start *goal-state* #'generate-child-states #'heuristic #'g-cost #'state-equal #'get-printable-state)))
+      (a-star::print-tree sol-root full-print #'get-printable-state)
+;      sol-root
    )
 
 )
