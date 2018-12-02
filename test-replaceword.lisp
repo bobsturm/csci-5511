@@ -1,0 +1,25 @@
+;;;; these are the test cases for replaceword
+
+(in-package :cl-user)
+
+(defun test-replaceword()
+  (progn (format t "Initiating tests for ~S...~%" #'replaceword) 
+         (tf:assert-error-thrown () () #'replaceword)
+         (tf:assert-error-thrown 'a 'a  #'replaceword)
+         (tf:assert-error-thrown 0 ()  #'replaceword)
+         (tf:assert-error-thrown 'a 0  #'replaceword)
+         (tf:error-if-failed2 'a () () #'replaceword)
+         (tf:error-if-failed2 'a '(a) '(YYYY) #'replaceword)
+         (tf:error-if-failed2 'a '(b) '(b) #'replaceword)
+         (tf:error-if-failed2 'a '((b)) '((b)) #'replaceword)
+         (tf:error-if-failed2 'a '(b a) '(b YYYY) #'replaceword)
+         (tf:error-if-failed2 'a '(a b) '(YYYY b) #'replaceword)
+         (tf:error-if-failed2 'a '(b a c) '(b YYYY c) #'replaceword)
+         (tf:error-if-failed2 'nikos '(i am nikos) '(i am yyyy) #'replaceword)
+         (tf:error-if-failed2 'nomatch '(i don\'t always write code\, but when i do\, i write tests) '(i don\'t always write code\, but when i do\, i write tests) #'replaceword)
+         (tf:error-if-failed2 'a '(x 0 z) '(x 0 z) #'replaceword)
+         (tf:error-if-failed2 'a '(((((a b c))))) '(((((a b c))))) #'replaceword)
+         (format t "All ~S tests completed.~%" #'replaceword)
+    )
+)
+

@@ -1,4 +1,8 @@
-;; a location on the board, specified by row (i) and column (j)
+;;;; This file contains functions needed to invok a-star-search on a 3x3 puzzle.
+
+(in-package :cl-user)
+
+;;; A location on the board, specified by row (i) and column (j)
 (defstruct location
   i  ;; number representing row index
   j  ;; number representing column index
@@ -102,6 +106,17 @@
   state
 )
 
+(defun get-printable-state (s)
+   (if (not (null s))
+      (let ((row1 (format nil "~S~%" (car s)))
+            (remainder  (get-printable-state (cdr s))))
+         (if (null remainder)
+             row1
+                 (concatenate 'string row1 " " remainder)
+         )
+      )
+   )
+)
 
 ;; newloc is a location structure
 ;; returns nil if the move is not legal
@@ -182,10 +197,12 @@
    (if (null start)
        (setq start *default-start-state*)
    )
-;; todo: GET RID OF THIS -- TEMPORARY
-;   (setq start (create-state 1 2 3 4 5 *blank-square* 7 8 6))
    (setq *heuristic-start-state* start)
    (setq *heuristic-goal-state* *goal-state*)
-   (format t "Calling a-star-search with start:~S, goal:~S...~%" start *goal-state*)
-   (a-star:a-star-search start *goal-state* #'generate-child-states #'heuristic #'state-equal #'get-printable-state)
+;   (format t "Calling a-star-search with start:~S, goal:~S...~%" start *goal-state*)
+   (let ((sol-root (a-star:a-star-search start *goal-state* #'generate-child-states #'heuristic #'state-equal #'get-printable-state)))
+      (a-star::print-tree sol-root nil #'get-printable-state)
+      sol-root
+   )
+
 )

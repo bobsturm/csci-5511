@@ -1,3 +1,7 @@
+;;;; replaceword extra credit.
+
+(in-package :cl-user)
+
 (defun check-parms (sym l)
    (if (or (not (symbolp sym)) (not (listp l))) (error "Invalid parms.  sym must be a symbol and l must be a list.")
    )

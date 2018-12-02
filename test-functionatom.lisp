@@ -1,0 +1,25 @@
+;;;; This file contins test cases for functionatom.
+
+(in-package :cl-user)
+
+(defun test-functionatom()
+  (progn (format t "Initiating tests for ~S...~%" #'functionatom) 
+         (tf:error-if-failed1 () () #'functionatom)
+         (tf:error-if-failed1 '(1) '(1) #'functionatom)
+         (tf:error-if-failed1 '((1)) '(1) #'functionatom)
+         (tf:error-if-failed1 '(1 2) '(1 2) #'functionatom)
+         (tf:error-if-failed1 '((1) 2) '(1 2) #'functionatom)
+         (tf:error-if-failed1 '(1 (2)) '(1 2) #'functionatom)
+         (tf:error-if-failed1 '(1 2 3) '(1 2 3) #'functionatom)
+         (tf:error-if-failed1 '(1 (2) 3) '(1 2 3) #'functionatom)
+         (tf:error-if-failed1 '((1) (2) (3)) '(1 2 3) #'functionatom)
+         (tf:error-if-failed1 '(1 ((((2))) 3)) '(1 2 3) #'functionatom)
+         (tf:error-if-failed1 '(1 (2 (3))) '(1 2 3) #'functionatom)
+         (tf:error-if-failed1 '(1 (2 (3)) 4) '(1 2 3 4) #'functionatom)
+         (tf:error-if-failed1 '(1 (2 (3)) 4 (5)) '(1 2 3 4 5) #'functionatom)
+         (tf:error-if-failed1 '(1 (2 3) (((4) 5 6))) '(1 2 3 4 5 6) #'functionatom)
+         (tf:error-if-failed1 '(1 2 3 4 5 (6)) '(1 2 3 4 5 6) #'functionatom)
+         (format t "All ~S tests completed.~%" #'functionatom)
+   )
+)
+
