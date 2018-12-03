@@ -5,7 +5,7 @@
 
 (in-package :cl-user)
 (defpackage tf
-   (:export :assert-error-thrown :error-if-failed1 :error-if-failed2 :error-if-failed3 :error-if-failed4 :error-if-failed7)
+   (:export :assert-actual :assert-error-thrown :error-if-failed1 :error-if-failed2 :error-if-failed3 :error-if-failed4 :error-if-failed7)
 )
 (in-package :tf)
 
@@ -13,7 +13,7 @@
 (defun assert-actual (actual expected)
    (if (not (equalp actual expected))
       (progn 
-         (format t "TEST FAILED!~%******ACTUAL:~S~%****EXPECTED:~S" actual expected)
+         (format t "~&TEST FAILED!~%******ACTUAL:~S~%****EXPECTED:~S" actual expected)
          (error "TEST FAILED!! Expected Value was ~S but actual was ~S" expected actual)
       )
     )

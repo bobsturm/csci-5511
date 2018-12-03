@@ -24,6 +24,6 @@
   (load "functionatom.lisp")
   (load "replaceword.lisp")
   (load "puzzle-search.lisp")
-  (format t "Loading completed.  Invoking all tests...~%")
+  (format t "~&Loading completed.  Invoking all tests...~%")
   (test-all)
 )

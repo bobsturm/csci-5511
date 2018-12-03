@@ -82,7 +82,7 @@
    (let ((root  (create-node-helper nil "ROOT" 10000  nil nil)))
       (tf:error-if-failed3  root #'mock-generate-child-states #'mock-heuristic nil #'a-star:create-child-nodes)
    )
-   (format t "All ~S tests completed.~%" #'a-star:create-child-nodes)
+   (format t "~&All ~S tests completed.~%" #'a-star:create-child-nodes)
 )
 
 (defun create-test-tree ()
@@ -153,7 +153,7 @@
       (tf:error-if-failed7 9 10 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-state-equal #'mock-get-printable-state expected-root #'a-star:a-star-search)
    )
    (tf:error-if-failed7 999 10 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-state-equal #'mock-get-printable-state (create-test-tree) #'a-star:a-star-search)
-   (format t "All ~S tests completed.~%" #'a-star:a-star-search)
+   (format t "~&All ~S tests completed.~%" #'a-star:a-star-search)
 )
 
 (defun test-is-cycle()
@@ -205,7 +205,13 @@
         (tf:error-if-failed3 multiple-children-expanded-tree (create-node-helper nil "ABC7" 248 0 98) #'mock-state-equal t #'a-star:is-cycle)
       )
    )
-   (format t "All ~S tests completed.~%" #'a-star:is-cycle)
+   (format t "~&All ~S tests completed.~%" #'a-star:is-cycle)
+)
+
+(defun test-tree-to-list()
+   (format t "Initiating tests for ~S...~%" #'a-star:tree-to-list)
+   (tf:assert-actual (length (a-star:tree-to-list (create-test-tree))) 39)
+   (format t "~&All ~S tests completed.~%" #'a-star:tree-to-list)
 )
 
 
@@ -213,5 +219,6 @@
   (test-create-child-nodes)
   (test-a-star-search)
   (test-is-cycle)
+  (test-tree-to-list)
 )
 

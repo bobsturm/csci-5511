@@ -19,7 +19,7 @@
          (tf:error-if-failed2 'nomatch '(i don\'t always write code\, but when i do\, i write tests) '(i don\'t always write code\, but when i do\, i write tests) #'replaceword)
          (tf:error-if-failed2 'a '(x 0 z) '(x 0 z) #'replaceword)
          (tf:error-if-failed2 'a '(((((a b c))))) '(((((a b c))))) #'replaceword)
-         (format t "All ~S tests completed.~%" #'replaceword)
+         (format t "~&All ~S tests completed.~%" #'replaceword)
     )
 )
 

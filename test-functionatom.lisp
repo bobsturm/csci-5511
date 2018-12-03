@@ -19,7 +19,7 @@
          (tf:error-if-failed1 '(1 (2 (3)) 4 (5)) '(1 2 3 4 5) #'functionatom)
          (tf:error-if-failed1 '(1 (2 3) (((4) 5 6))) '(1 2 3 4 5 6) #'functionatom)
          (tf:error-if-failed1 '(1 2 3 4 5 (6)) '(1 2 3 4 5 6) #'functionatom)
-         (format t "All ~S tests completed.~%" #'functionatom)
+         (format t "~&All ~S tests completed.~%" #'functionatom)
    )
 )
 

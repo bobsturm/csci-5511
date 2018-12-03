@@ -12,7 +12,7 @@
        (tf:error-if-failed2 -1 2 nil #'is-legal)
        (tf:error-if-failed2 1 3 nil #'is-legal)
        (tf:error-if-failed2 3 1 nil #'is-legal)
-       (format t "All ~S tests completed.~%" #'replaceword)
+       (format t "~&All ~S tests completed.~%" #'replaceword)
     )
 )
 
@@ -25,7 +25,7 @@
        (tf:error-if-failed2 (create-state 1 2 3 4 5 6 7 8 9) 7 (make-location :i 2 :j 0) #'find-loc)
        (tf:error-if-failed2 (create-state 1 2 3 4 5 6 7 -13 9) -13 (make-location :i 2 :j 1)#'find-loc)
        (tf:error-if-failed2 (create-state 1 2 3 4 5 6 7 8 9) 9 (make-location :i 2 :j 2) #'find-loc)
-       (format t "All ~S tests completed.~%" #'find-loc)
+       (format t "~&All ~S tests completed.~%" #'find-loc)
     )
 )
 
@@ -45,7 +45,7 @@
        (tf:error-if-failed2 (make-location :i 0 :j 0) (make-location :i 2 :j 2) nil #'is-legal-move)
        (tf:assert-error-thrown () () #'is-legal-move)
        (tf:assert-error-thrown '(0 0) '(0 1) #'is-legal-move)
-       (format t "All ~S tests completed.~%" #'is-legal-move)
+       (format t "~&All ~S tests completed.~%" #'is-legal-move)
     )
 )
 
@@ -61,7 +61,7 @@
        (tf:error-if-failed2 (create-state 1 2 3 4 *blank-square* 5 6 7 8) (make-location :i 2 :j 2) nil  #'move)
        (tf:error-if-failed2 (create-state 1 2 3 4 5 6 7 8 *blank-square*) (make-location :i 2 :j 3) nil  #'move)
        (tf:error-if-failed2 (create-state *blank-square* 1 2 3 4 5 6 7 8) (make-location :i -1 :j 0) nil  #'move)
-       (format t "All ~S tests completed.~%" #'move)
+       (format t "~&All ~S tests completed.~%" #'move)
     )
 )
 
@@ -84,7 +84,7 @@
        (tf:error-if-failed1 (create-state 8 7 6 *blank-square* 5 4 3 2 1) (list (create-state *blank-square* 7 6 8 5 4 3 2 1)
                                                                              (create-state 8 7 6 3 5 4 *blank-square* 2 1) 
                                                                              (create-state 8 7 6 5 *blank-square* 4 3 2 1)) #'generate-child-states)
-       (format t "All ~S tests completed.~%" #'generate-child-states)
+       (format t "~&All ~S tests completed.~%" #'generate-child-states)
     )
 )
 
@@ -94,7 +94,7 @@
        (tf:error-if-failed4 2 2 (create-state 1 2 3 4 5 6 7 8 9) (create-state 9 2 3 4 5 6 7 8 1) 4 #'man-distance)
        (tf:error-if-failed4 1 2 (create-state 1 2 3 4 5 6 7 8 9) (create-state 1 2 3 6 5 4 7 8 9) 2 #'man-distance)
        (tf:error-if-failed4 2 1 (create-state 1 2 3 4 5 6 7 8 9) (create-state 1 2 3 4 5 6 8 7 9) 1 #'man-distance)
-       (format t "All ~S tests completed.~%" #'man-distance)
+       (format t "~&All ~S tests completed.~%" #'man-distance)
     )
 )
 
@@ -107,7 +107,7 @@
        (tf:error-if-failed2 nil (create-state 1 2 *blank-square* 4 5 3 7 8 6) 2 #'heuristic) ;6
        (tf:error-if-failed2 nil (create-state 1 2 3 4 *blank-square* 5 7 8 6) 2 #'heuristic) ;4
        (tf:error-if-failed2 nil (create-state *blank-square* 2 4 6 8 1 3 5 7) 16 #'heuristic);34
-       (format t "All ~S tests completed.~%" #'heuristic)
+       (format t "~&All ~S tests completed.~%" #'heuristic)
    )
 )
 

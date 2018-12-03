@@ -4,7 +4,7 @@
 
 ;;; All functions after print-tree are exposed solely for testing purposes
 (defpackage a-star
-   (:export :a-star-search :print-tree :test-all-a-star-search :create-node :create-child-nodes :set-children :set-g_n :is-cycle :get-children)
+   (:export :a-star-search :print-tree :test-all-a-star-search :create-node :create-child-nodes :set-children :set-g_n :is-cycle :get-children :tree-to-list)
 )
 
 (in-package :a-star)
@@ -20,7 +20,9 @@
              ; CYCLES HAVE BEEN REMOVED.  THIS WAS ORIGINALLY ADDED FOR DEBUGGING AND IS NOT NEEDED FOR A WORKING SOLUTION.
    h_n       ; A number representing the heuristic function's value for this node
    g_n       ; A number representing the actual cost of the path to this node.  this is nil until this node has been expanded.
+   f_n       ; cost to parent + h_n.  Although this is a derivable value, we put it in here to make sorting the frontier easy.
    children  ; list of nodes created for potential expansion.  nil if this node has not yet been expanded.
+   is-repeat ; flag indicating if the state is a repeat state and the search was aborted.
 )
 
 
@@ -36,7 +38,10 @@
                   (if (equalp (search-node-h_n n) 0)
                       (format t "  ***GOAL STATE***")
                   )
-                  (format t "~&g(n):~S~%NUM-CHILDREN:~S~%"  gn child-count)
+                  (format t "~&g(n):~S~&f(n):~S~%NUM-CHILDREN:~S~%" gn (search-node-f_n n) child-count)
+                  (if (search-node-is-repeat n)
+                      (format t "~&***THIS STATE IS A CYCLE. NO SOLUTION POSSIBLE.***")
+                  )
                )
             )
     )
@@ -80,15 +85,23 @@
 )
 
 (defun create-node (parent name state h_n)
-   (make-search-node 
-       :name (if (null parent) name 
-               (concatenate 'string (search-node-name parent) (write-to-string '-) name) ;(write-to-string '-\>)
-             )
-       :state state
-       :h_n h_n
-       :parent (if (null parent) nil (search-node-name parent))
+   (let ((f_n 
+            (if (null parent) h_n
+               (if (null (search-node-g_n parent)) h_n
+                  (+ (search-node-g_n parent) h_n)
+               )
+            )
+         ))
+      (make-search-node 
+          :name (if (null parent) name 
+                  (concatenate 'string (search-node-name parent) (write-to-string '-) name)
+                )
+          :state state
+          :h_n h_n
+          :parent (if (null parent) nil (search-node-name parent))
+          :f_n f_n
+      )
    )
-
 )
 
 ;;; Utility function for create-child-nodes
@@ -110,13 +123,12 @@
 
 ;; TODO: Needs to also add in g(n) of the parent node for true A*
 (defun search-node-sorter (a b)
-   (< (search-node-h_n a) (search-node-h_n b))
+   (< (search-node-f_n a) (search-node-f_n b))
 )
 
 ;;; Returns t if the state on the nodes are equal, the nodes do not have the same name
 ;;; and the nodes have both been popped from the frontier (and thus g_n is valued).
 (defun is-duplicate-state (node1 node2 fn-state-equal)
-   (format t "~&NODE1:~S~%NODE2:~S~%" node1 node2)
    (and (funcall fn-state-equal (get-state node1) (get-state node2)) 
         (not (equalp (search-node-name node1) (search-node-name node2)))
         (numberp (search-node-g_n node1))
@@ -130,19 +142,38 @@
 ;;; have a cost associated with them.  You may pass in a node that is connected to the tree
 ;;; for newnode.  For a cycle to exist, the 2 nodes must not have the same name. 
 (defun is-cycle (tree newnode fn-state-equal)
-   (if (not (null tree))
-       (if (listp tree)
-           (if (or (is-duplicate-state (car tree) newnode fn-state-equal)
-                   (is-cycle (cdr tree) newnode fn-state-equal)
-                   (is-cycle (search-node-children (car tree)) newnode fn-state-equal))
-               t
-           )
-         (if (or (is-duplicate-state tree newnode fn-state-equal)
-                 (is-cycle (search-node-children tree) newnode fn-state-equal))
-             t
-         )
-       )
+  (not (null (find-if #'(lambda (x) (is-duplicate-state x newnode fn-state-equal)) (tree-to-list tree))))
+)
+
+(defun tree-to-list (tree)
+  (if (not (null tree))
+     (if (listp tree)
+        (append (list (car tree)) (tree-to-list (cdr tree)) (tree-to-list (search-node-children (car tree))))
+      (append (list tree) (tree-to-list (search-node-children tree)))
+     )
+  )
+)
+
+;;; Returns nil if parent is not found
+(defun find-parent (tree node)
+   (find-if #'(lambda (x) (equalp (search-node-name x) (search-node-parent node))) (tree-to-list tree))
+)
+
+(defun calc-cost (parent node fn-g-cost)
+   (if (null node)
+      (error "node must not be nil to calculate cost!")
    )
+   (if (not (null parent))
+      (funcall fn-g-cost (search-node-g_n parent) (get-state parent) (get-state node))
+     0
+   )
+)
+
+(defun is-goal-state (goal-state node fn-state-equal)
+   (if (or (null goal-state) (null node))
+      (error "goal-state and node must not be nil")
+   )
+   (funcall fn-state-equal goal-state (search-node-state node))
 )
 
 ;; input:  the frontier
@@ -154,25 +185,31 @@
       (error "Frontier is either nil or not a list!  frontier:~S~%" frontier)
    )
    (let ((next (pop frontier)))
-      (set-g_n next (funcall fn-g-cost curcost (get-state curnode) (get-state next)))
-      (if (not (is-cycle root next fn-state-equal)) ; end the search before expanding this node.  caller will know search failed because h_x is not 0
-         (if (not (funcall fn-state-equal goal-state (search-node-state next)))
-            (let ((children (create-child-nodes next fn-generate-child-states fn-heuristic)))
-               (set-children next children)
-               (expand-next
-                  root
-                  (sort (append children frontier) #'search-node-sorter) 
-                  goal-state
-                  (search-node-g_n next)
-                  next
-                  fn-generate-child-states
-                  fn-heuristic
-                  fn-g-cost
-                  fn-state-equal) 
-         )  
+      (let ((parent (find-parent root next)))         
+;         (format t "~&PARENT IS:~S" parent)
+;         (format t "~&LIST IS:~S" (tree-to-list root))
+;         (format t "~&NEXT IS:~S" next)
+         (set-g_n next (calc-cost parent next fn-g-cost))
+         (if (not (is-cycle root next fn-state-equal)) ; end the search before expanding this node.  caller will know search failed because h_x is not 0
+            (if (not (is-goal-state goal-state next fn-state-equal))
+               (let ((children (create-child-nodes next fn-generate-child-states fn-heuristic)))
+                  (set-children next children)
+                  (expand-next
+                     root
+                     (sort (append children frontier) #'search-node-sorter) 
+                     goal-state
+                     (search-node-g_n next)
+                     next
+                     fn-generate-child-states
+                     fn-heuristic
+                     fn-g-cost
+                     fn-state-equal) 
+              )  
+           )
+         (setf (search-node-is-repeat next) t) ; set the repeat flag and abort the search becuase a cycle was detected.
+      )
      )
    )
-  )
 )
 )
 )
@@ -180,11 +217,11 @@
 
 ;; root: the root of the search tree to search
 (defun a-star:a-star-search (start-state goal-state fn-generate-child-states fn-heuristic fn-g-cost fn-state-equal fn-get-printable-state)
-   (format t "STARTING A* SEARCH~%")
+   (format t "~&STARTING A* SEARCH~%")
    (let ((root (create-node nil "ROOT" start-state (funcall fn-heuristic nil start-state))))
       ;; start the search...
       (expand-next root (list root) goal-state 0 nil fn-generate-child-states fn-heuristic fn-g-cost fn-state-equal)
-      (format t "A* SEARCH COMPLETED~%")
+      (format t "~&A* SEARCH COMPLETED~%")
       root
    )
 )
