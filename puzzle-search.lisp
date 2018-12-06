@@ -106,6 +106,14 @@
   state
 )
 
+;;; This print function is used by a-star to print the state of the puzzle.
+;;; Given a state, this returns a pretty print representation of the state.
+;;; For example:
+;;;
+;;; "(1 2 3)
+;;;  (4 5 6)
+;;;  (7 8 0)
+;;; "
 (defun get-printable-state (s)
    (if (not (null s))
       (let ((row1 (format nil "~S~%" (car s)))
@@ -136,6 +144,8 @@
    )  
 )
 
+;;; Given a parent state, generates all legal 8-puzzle moves from this state.
+;;; A list of the candidate child states is returned.
 (defun generate-child-states (parentstate)
        (let ((blankloc (find-loc parentstate *blank-square*)))
          (remove nil (list (move parentstate (make-location :i (- (location-i blankloc) 1) :j (location-j blankloc))) ;; move up
@@ -147,13 +157,16 @@
        )
 )
 
+;;; Utility function for calculating manhattan distance for the (i, j) tile.
+;;; If *blank-square* is located at the (i, j) location for from-state, 0 is returned.
 (defun man-distance-filter-blank (i j from-state to-state)
    (if (equal (get-loc-value from-state i j) *blank-square*) 0
       (man-distance i j from-state to-state)
    )
 )
 
-;; i and j are coordinates to the tile in from-state to measure distance to to-state
+;;; Given 2 states, calculates the manhattan distance for tile in the (i, j) position.
+;;; i and j are coordinates to the tile in from-state to measure distance to to-state
 (defun man-distance (i j from-state to-state)
    (let ((tile (get-loc-value from-state i j)))
       (let ((to-loc (find-loc to-state tile)))
@@ -162,29 +175,34 @@
    )
 )
 
-;; TODO: remove blank tile
-(defun heuristic-inner (i j cur start goal ignore)
+;;; Utility function for heuristic.  Sums up the man-distance between the 2 given states: cur and goal.
+;;; The *blank-square* is not included in the sum.
+(defun heuristic-inner (i j cur goal)
    (if (> j 2)  0
       (+ ; (man-distance-filter-blank i j cur start)
          (man-distance-filter-blank i j cur goal)
-         (if (equal i 2) (heuristic-inner 0 (+ j 1) cur start goal ignore)
-             (heuristic-inner (+ 1 i) j cur start goal ignore)
+         (if (equal i 2) (heuristic-inner 0 (+ j 1) cur goal)
+             (heuristic-inner (+ 1 i) j cur goal)
          )
       )
    )
 )
 
-;; manhattan distance
-;; curstate is not use in this implementation (8 puzzle), but may be use in others
-;; IMPORTANT: The global variables *heuristic-goal-state* and *heuristic-start-state* must be set before calling this function.  The heuristic is dependent on these!
+;;; This is the heuristic function for 8-puzzle.  The signature for this method requires a current puzzle state and a future puzzle state.
+;;; This is due to the requirements of a-star-search.  For a puzzle search, only futurestate is used in the calculation.
+;;; This heuristic sums all the manhattan distances for each number from the *heuristic-goal-state* global variable.
+;;; The blank square is not added to the sum - only numbers are considered.
 (defun heuristic (curstate futurestate)
-   (if (or (null *heuristic-start-state*) (null *heuristic-goal-state*))
-      (error "The global variable *heuristic-goal-state* and *heuristic-start-state* must be setup before heuristics can be calculated!")
+   (if (null *heuristic-goal-state*)
+      (error "The global variable *heuristic-goal-state* must be setup before heuristics can be calculated!")
    )
-   (heuristic-inner 0 0 futurestate *heuristic-start-state* *heuristic-goal-state* *blank-square*)
+   (heuristic-inner 0 0 futurestate *heuristic-goal-state*)
 )
 
 ;;; Cost function for puzzle.
+;;; This calculation is very simple.  Every state change is +1 from the previous cost, which is curcost.
+;;; If nil is received as the prevstate, it is assumed that it is the initial state and hence a cost of 0
+;;; is returned.
 (defun g-cost (curcost prevstate newstate)
    (if (null prevstate)
        0 ; the root node is the only node with prevstate of nil
@@ -192,6 +210,9 @@
    )
 )
 
+;;; Given 2 states, returns t if the states are equivalent; nil otherwise.
+;;; For puzzle search, this is simply an equalp of the 2 lists.
+;;; If nil is passed in for either state, and error is raised.
 (defun state-equal (state1 state2)
    (if (not (and (listp state1) (listp state2)))
       (error "Unexpected type received within function ~S" #'state-equal)
@@ -201,14 +222,13 @@
 
 ;; solves the 8-puzzle problem with the given start state of the board.
 ;; if no start state is provided the *default-start-state is used.
-(defun puzzle-search (&key (start *default-start-state*) (full-print nil))
+(defun puzzle-search (&key (start *default-start-state*) (print-detail nil))
    (if (null start)
        (setq start *default-start-state*)
    )
-   (setq *heuristic-start-state* start)
    (setq *heuristic-goal-state* *goal-state*)
    (let ((sol-root (a-star:a-star-search start *goal-state* #'generate-child-states #'heuristic #'g-cost #'state-equal #'get-printable-state)))
-      (a-star::print-tree sol-root full-print #'get-printable-state)
+      (a-star::print-tree sol-root print-detail #'get-printable-state)
 ;      sol-root
    )
 
