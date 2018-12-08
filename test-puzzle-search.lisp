@@ -1,4 +1,5 @@
 ;;;; This file contains tests for puzzle-search functions.  Call test-all-puzzle-search to test the puzzle search test suite.
+;;;; These tests could be improved with more test cases on invlalid input to the functions.
 
 (in-package :cl-user)
 

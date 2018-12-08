@@ -1,4 +1,4 @@
-;;;; Automates the loading and full regression suite tests for all CSCI 5511 assignments and extra credit
+;;;; Automates the loading and full regression suite tests for all CSCI 5511 programming assignment.
 
 (in-package :cl-user)
 
