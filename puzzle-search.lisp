@@ -209,11 +209,10 @@
    )
 )
 
-;;; This is the heuristic function for 8-puzzle.  The signature for this method requires a current puzzle state and a future puzzle state.
-;;; This is due to the requirements of a-star-search.  For a puzzle search, only futurestate is used in the calculation.
+;;; This is the heuristic function for 8-puzzle.  The signature for this method requires a future puzzle state.
 ;;; This heuristic sums all the manhattan distances for each tile in futurestate from the *heuristic-goal-state* global variable.
 ;;; The blank square is not added to the sum - only numbers are considered.
-(defun heuristic (curstate futurestate)
+(defun heuristic (futurestate)
    (if (null *heuristic-goal-state*)
       (error "The global variable *heuristic-goal-state* must be setup before heuristics can be calculated!")
    )

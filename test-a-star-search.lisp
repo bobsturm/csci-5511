@@ -12,7 +12,7 @@
 ;;;   State must be between 0 and 999
 
 ;;; mock heuristic: returns the absolute value of (10 - futurestate)
-(defun mock-heuristic (curstate futurestate)
+(defun mock-heuristic (futurestate)
    (abs (- futurestate 10))
 )
 
@@ -43,9 +43,9 @@
 )
 
 ;;; Mock equals for 2 numbers
-(defun mock-state-equal (state1 state2)
-   (equal state1 state2)
-)
+;(defun mock-state-equal (state1 state2)
+;   (equal state1 state2)
+;)
 
 ;;; Test suite for create-child-nodes
 (defun test-create-child-nodes()
@@ -139,16 +139,16 @@
 ;;; tests for a-star-search
 (defun test-a-star-search()
    (format t "Initiating tests for ~S...~%" #'a-star:a-star-search)
-   (tf:error-if-failed8 100 10 10 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-state-equal #'mock-get-printable-state
+   (tf:error-if-failed6 100 10 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-get-printable-state
                         (a-star:create-node nil "ROOT" 10 0 0) #'a-star:a-star-search)
    (let ((expected-root (a-star:create-node nil "ROOT" 9 0 1)))
       (a-star:set-children expected-root (list (a-star:create-node expected-root "1" 10 1 0)
                                                (a-star:create-node expected-root "2" 8 1 2)
                                                (a-star:create-node expected-root "3" 18 1 8)
                                                (a-star:create-node expected-root "4" 4 1 6)))
-      (tf:error-if-failed8 100 9 10 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-state-equal #'mock-get-printable-state expected-root #'a-star:a-star-search)
+      (tf:error-if-failed6 100 9 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-get-printable-state expected-root #'a-star:a-star-search)
    )
-   (tf:error-if-failed8 100 999 10 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-state-equal #'mock-get-printable-state (create-test-tree) #'a-star:a-star-search)
+   (tf:error-if-failed6 100 999 #'mock-generate-child-states #'mock-heuristic #'mock-g-cost #'mock-get-printable-state (create-test-tree) #'a-star:a-star-search)
    (format t "~&All ~S tests completed.~%" #'a-star:a-star-search)
 )
 

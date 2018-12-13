@@ -13,7 +13,7 @@
        (tf:error-if-failed2 -1 2 nil #'is-legal)
        (tf:error-if-failed2 1 3 nil #'is-legal)
        (tf:error-if-failed2 3 1 nil #'is-legal)
-       (format t "~&All ~S tests completed.~%" #'replaceword)
+       (format t "~&All ~S tests completed.~%" #'is-legal)
     )
 )
 
@@ -104,10 +104,10 @@
    (setq *heuristic-goal-state* *goal-state*)
 
    (progn (format t "Initiating tests for ~S...~%" #'heuristic) 
-       (tf:error-if-failed2 nil *goal-state* 0 #'heuristic) ; 4
-       (tf:error-if-failed2 nil (create-state 1 2 *blank-square* 4 5 3 7 8 6) 2 #'heuristic) ;6
-       (tf:error-if-failed2 nil (create-state 1 2 3 4 *blank-square* 5 7 8 6) 2 #'heuristic) ;4
-       (tf:error-if-failed2 nil (create-state *blank-square* 2 4 6 8 1 3 5 7) 16 #'heuristic);34
+       (tf:error-if-failed1 *goal-state* 0 #'heuristic) ; 4
+       (tf:error-if-failed1 (create-state 1 2 *blank-square* 4 5 3 7 8 6) 2 #'heuristic) ;6
+       (tf:error-if-failed1 (create-state 1 2 3 4 *blank-square* 5 7 8 6) 2 #'heuristic) ;4
+       (tf:error-if-failed1 (create-state *blank-square* 2 4 6 8 1 3 5 7) 16 #'heuristic);34
        (format t "~&All ~S tests completed.~%" #'heuristic)
    )
 )

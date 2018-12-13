@@ -6,7 +6,7 @@
 (in-package :cl-user)
 
 (defpackage tf
-   (:export :assert-actual :assert-error-thrown :error-if-failed1 :error-if-failed2 :error-if-failed3 :error-if-failed4 :error-if-failed8)
+   (:export :assert-actual :assert-error-thrown :error-if-failed1 :error-if-failed2 :error-if-failed3 :error-if-failed4 :error-if-failed6)
 )
 (in-package :tf)
 
@@ -81,7 +81,7 @@
 
 ;;; Use this testing helper to invoke a function with 8 arguments and validate that the given expected result is
 ;;; equal -- using equalp -- to the actual result from invoking the function with the arguments given.
-(defun error-if-failed8 (arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 expected fn)
-   (format t "~&calling ~S with arg1:~S, arg2:~S, arg3:~S, arg4:~S, arg5:~S, arg6:~S, arg7:~S, arg8:~S; expecting:~S..." fn arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 expected)
-   (assert-actual (funcall fn arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8) expected)
+(defun error-if-failed6 (arg1 arg2 arg3 arg4 arg5 arg6 expected fn)
+   (format t "~&calling ~S with arg1:~S, arg2:~S, arg3:~S, arg4:~S, arg5:~S, arg6:~S; expecting:~S..." fn arg1 arg2 arg3 arg4 arg5 arg6 expected)
+   (assert-actual (funcall fn arg1 arg2 arg3 arg4 arg5 arg6) expected)
 )

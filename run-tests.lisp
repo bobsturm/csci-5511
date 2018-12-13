@@ -8,6 +8,7 @@
   (test-replaceword)
   (test-all-a-star-search)
   (test-all-puzzle-search)
+  (test-all-queens)
   "ALL TESTS PASSED!"
 )
 
@@ -24,6 +25,8 @@
   (load "functionatom.lisp")
   (load "replaceword.lisp")
   (load "puzzle-search.lisp")
+  (load "queens.lisp")
+  (load "test-queens.lisp")
   (format t "~&Loading completed.  Invoking all tests...~%")
   (test-all)
 )
